@@ -5,9 +5,9 @@ import { databasesClient } from './utils/firebase.js';
 /**
  *
  * @param outDir The directory to output the types to. Defaults to "./types"
- * @param includeDBName Should exported interfaces include the database name as prefix? Defaults to false
+ * @param queryResultsLength The number of documents to query for each collection. Defaults to 25
  */
-const fetchNewTypes = async ({ outDir = './types' } = {}) => {
+const FetchNewTypes = async ({ outDir = './types', queryResultsLength = 25 } = {}) => {
     // Create folder if non-existent
     if (!existsSync(outDir)) {
         mkdirSync(outDir);
@@ -23,7 +23,7 @@ const fetchNewTypes = async ({ outDir = './types' } = {}) => {
         // Create interface
         const intf = create.interface(collectionName, DeclarationFlags.Export);
         const result = new Map();
-        const { docs: documents } = await databasesClient.collection(collectionName).limit(25).get();
+        const { docs: documents } = await databasesClient.collection(collectionName).limit(queryResultsLength).get();
         for (const doc of documents) {
             const docData = doc.data();
             for (const key in docData) {
@@ -92,5 +92,4 @@ const fetchNewTypes = async ({ outDir = './types' } = {}) => {
     }
     return 'file generated successfully';
 };
-await fetchNewTypes();
-export { fetchNewTypes };
+export { FetchNewTypes };
