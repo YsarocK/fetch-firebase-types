@@ -1,6 +1,6 @@
 import { create, emit, DeclarationFlags, type } from 'dts-dom';
 import { createWriteStream, existsSync, mkdirSync } from 'fs';
-import findType from './utils/findType.js';
+import FindType from './utils/FindType.js';
 import { databasesClient } from './utils/firebase.js';
 /**
  *
@@ -28,13 +28,13 @@ const fetchNewTypes = async ({ outDir = './types' } = {}) => {
             const docData = doc.data();
             for (const key in docData) {
                 const value = docData[key];
-                let t = findType(value);
+                let t = FindType(value);
                 // handle 2nd level tree
                 if (t === type.object) {
                     t = new Map();
                     for (const keyC in value) {
                         const vC = value[keyC];
-                        const tC = findType(vC);
+                        const tC = FindType(vC);
                         if (!t.has(keyC)) {
                             t.set(keyC, [tC]);
                         }

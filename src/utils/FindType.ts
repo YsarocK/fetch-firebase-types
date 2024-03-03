@@ -13,7 +13,7 @@ function isFloat(n: any) {
   return Number(n) === n && n % 1 !== 0;
 }
 
-const findType = (attribute: any) => {
+const FindType = (attribute: any) => {
   // handle null values
   if (attribute === null) {
     return type.null;
@@ -50,4 +50,4 @@ const findType = (attribute: any) => {
   return type.any;
 };
 
-export default findType;
+export default FindType;

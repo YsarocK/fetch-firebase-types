@@ -1,16 +1,14 @@
 import { create, emit, DeclarationFlags, type, PrimitiveType, ArrayTypeReference } from 'dts-dom';
 import { createWriteStream, existsSync, mkdirSync } from 'fs';
-import findType from './utils/findType.js';
+import FindType from './utils/FindType.js';
 import { databasesClient } from './utils/firebase.js';
-
-interface fetchParameters { outDir?: string }
+import type { FetchParameters } from "./types/index.js";
 
 /**
- * 
+ *
  * @param outDir The directory to output the types to. Defaults to "./types"
- * @param includeDBName Should exported interfaces include the database name as prefix? Defaults to false
  */
-const fetchNewTypes = async ({ outDir = './types' }: fetchParameters = {}) => {
+const FetchNewTypes = async ({ outDir = './types', queryResultsLength = 25 }: FetchParameters = {}) => {
   // Create folder if non-existent
   if (!existsSync(outDir)) {
     mkdirSync(outDir);
@@ -33,14 +31,14 @@ const fetchNewTypes = async ({ outDir = './types' }: fetchParameters = {}) => {
 
     const result = new Map();
 
-    const { docs: documents } = await databasesClient.collection(collectionName).limit(25).get();
+    const { docs: documents } = await databasesClient.collection(collectionName).limit(queryResultsLength).get();
 
     for (const doc of documents) {
       const docData = doc.data();
 
       for (const key in docData) {
         const value = docData[key];
-        let t: PrimitiveType | ArrayTypeReference | Map<string, any> = findType(value);
+        let t: PrimitiveType | ArrayTypeReference | Map<string, any> = FindType(value);
 
         // handle 2nd level tree
         if (t === type.object) {
@@ -50,7 +48,7 @@ const fetchNewTypes = async ({ outDir = './types' }: fetchParameters = {}) => {
           for (const keyC in value) {
             const vC = value[keyC];
 
-            const tC = findType(vC);
+            const tC = FindType(vC);
 
             if (!t.has(keyC)) {
               t.set(keyC, [tC]);
@@ -111,6 +109,4 @@ const fetchNewTypes = async ({ outDir = './types' }: fetchParameters = {}) => {
   return 'file generated successfully';
 };
 
-await fetchNewTypes();
-
-export { fetchNewTypes };
+export { FetchNewTypes };
